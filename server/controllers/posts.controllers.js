@@ -1,4 +1,5 @@
 const Post = require('../models/posts.model');
+const jwt = require('jsonwebtoken');
 
 module.exports = {
   findAll: (req, res) => {
@@ -9,13 +10,13 @@ module.exports = {
         .exec()
         .then(data => {
             return res.status(200).json({
-                message: "get all answer data",
+                message: "get all data",
                 data
             })
         })
         .catch(err => {
             return res.status(400).json({
-                message: 'failed to get all answers data',
+                message: 'failed to get all data',
                 err
             })
         })
@@ -26,8 +27,7 @@ module.exports = {
             title: req.body.title,
             imageUrl: req.file.cloudStoragePublicUrl,
             user: req.body.userId,
-            upvote: [],
-            downvote: []
+            likes: []
         }, (err, newpost) => {
             if (err) {
                 return res.status(400).json({
@@ -54,13 +54,13 @@ module.exports = {
           .exec()
           .then(data => {
               return res.status(200).json({
-                  message: "Succeed get answer data by id",
+                  message: "Succeed get data by id",
                   data
               })
           })
           .catch(err => {
               return res.status(400).json({
-                  message: "Failed to get answer data by Id"
+                  message: "Failed to get data by Id"
               })
           })
   },
@@ -103,6 +103,55 @@ module.exports = {
             })
     },
 
+    toggleLike: (req, res) => {
+        let postId = req.params.id;
+        console.log(postId)
+
+        let decoded = jwt.decode(req.headers.token, process.env.SECRET)
+        let userId = decoded.id;
+
+        Post.findById(postId)
+            .then(data => {
+                let indexUserLikes = data.likes.indexOf(userId);
+                if (indexUserLikes == -1) {
+                    data.likes.push(userId);
+                    data.save()
+                        .then(post => {
+                            return res.status(200).json({
+                                message: 'succeed to like post',
+                                data: post
+                            })
+                        })
+                        .catch(err => {
+                            return res.status(400).json({
+                                message: 'failed to likes post',
+                                err
+                            })
+                        })
+                } else {
+                    data.likes.splice(indexUserLikes, 1);
+                    data.save()
+                        .then(post => {
+                            return res.status(200).json({
+                                message: 'succeed to unlike post',
+                                data: post
+                            })
+                        })
+                        .catch(err => {
+                            return res.status(400).json({
+                                message: 'failed to unlike post',
+                                err
+                            })
+                        })
+                }
+            })
+            .catch(err => {
+                return res.status(400).json({
+                    message: 'cannot find post',
+                    err
+                })
+            })
+    },
 
     // uploadFile: (req, res) => {
     //     Post

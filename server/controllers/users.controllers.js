@@ -21,7 +21,7 @@ module.exports = {
             let passwordCheck = bcrypt.compareSync(req.body.password, userData.password)
             if (passwordCheck) {
               let token = jwt.sign({id : userData._id},
-              'secret')
+              process.env.SECRET)
               return res.status(200).json({
                 message: 'Sign in success',
                 data : {
@@ -72,7 +72,7 @@ module.exports = {
             email     : req.body.email
           })
             .then(data => {
-              let token = jwt.sign({id : data._id}, 'secret');
+              let token = jwt.sign({id : data._id}, process.env.SECRET);
 
               return res.status(201).json({
                 message: 'Created new account succeed',
