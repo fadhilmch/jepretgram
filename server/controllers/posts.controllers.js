@@ -7,6 +7,7 @@ module.exports = {
         .populate('user')
         .populate('upvote')
         .populate('downvote')
+        .sort('-createdAt')
         .exec()
         .then(data => {
             return res.status(200).json({
@@ -23,10 +24,13 @@ module.exports = {
   },
 
   create: (req, res) => {
+    let decoded = jwt.decode(req.headers.token, process.env.SECRET)
+    let userId = decoded.id;
+
     Post.create({
             title: req.body.title,
             imageUrl: req.file.cloudStoragePublicUrl,
-            user: req.body.userId,
+            user: userId,
             likes: []
         }, (err, newpost) => {
             if (err) {

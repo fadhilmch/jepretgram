@@ -4,6 +4,15 @@ const jwt       = require('jsonwebtoken')
 const saltRound = 10
 
 module.exports = {
+  getUserId: (req, res) => {
+    console.log(req.headers.token)
+    let decoded = jwt.decode(req.headers.token, process.env.SECRET)
+    let userId = decoded.id;
+    return res.status(200).json({
+      message: 'succeess get user id',
+      data: userId
+    })
+  },
   signIn: (req, res) => {
     User
       .findOne({
